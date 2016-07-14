@@ -1,0 +1,15 @@
+{
+    "global" : {
+        "lang": "en",
+        "sender": ""
+    },
+    "http": {
+        "host": "127.0.0.1",
+        "port": 8000
+    },
+    "diaspora": {
+        "pod": "https://framasphere.org",
+        "username": "johndoe",
+        "password": ""
+    }
+}

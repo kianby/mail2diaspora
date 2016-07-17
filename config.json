@@ -1,13 +1,14 @@
 {
     "global" : {
-        "lang": "en",
-        "sender": ""
+        "lang": "en",              # language (unused)
+        "sender": "",              # check sender e-mail to ignore spamming
+        "tempdir": "./"            # temporarly directory to save images
     },
     "http": {
-        "host": "127.0.0.1",
-        "port": 8000
+        "host": "127.0.0.1",       # HTTP host and port to receive e-mails
+        "port": 8000               # as JSON via SRMail
     },
-    "diaspora": {
+    "diaspora": {                  # Diaspora Pod info
         "pod": "https://framasphere.org",
         "username": "johndoe",
         "password": ""

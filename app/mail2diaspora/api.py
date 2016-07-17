@@ -1,21 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import logging
-from flask import request, make_response, abort
-from json import dumps
+import base64
 import diaspy
+from flask import request, make_response, abort
 from mail2diaspora import app
 
 logger = logging.getLogger(__name__)
+authorized_sender = app.config['app']['global']['sender']
+tempdir = app.config['app']['global']['tempdir']
 dconfig = app.config['app']['diaspora']
+
 
 @app.route("/inbox", methods=['POST'])
 def new_mail():
 
     try:
         data = request.get_json()
-        logging.debug('diapora posting: %s' % data)
+        logger.debug('diapora posting: %s' % data)
         post_diaspora(data)
     except:
         logger.exception("diaspora posting failure")
@@ -25,34 +29,64 @@ def new_mail():
 
 def post_diaspora(data):
 
+    if authorized_sender not in data['from']:
+        logger.warn('unauthorized e-mail sender: %s' % data)
+        return
+
     conn = diaspy.connection.Connection(
         pod=dconfig['pod'],
         username=dconfig['username'],
         password=dconfig['password'])
-    try:
-        conn.login()
-        stream = diaspy.streams.Stream(conn)
-    except:
-        logger.warn('login failure %s' % dconfig)
+    conn.login()
+    stream = diaspy.streams.Stream(conn)
 
-    from_email = data['from']
-    if app.config['app']['global']['sender'] in from_email:
-        message = get_message(data['parts'])
-        if message:
-            stream.post(message)
+    message = get_text_content(data['parts'])
+    if not message:
+        logger.warn('no message found in e-mail body: %s' % data)
+        return
+
+    images = []
+    if 'attachments' in data:
+        images = get_parts(data['attachments'], 'image/')
+
+    # post text and image
+    if images:
+        if len(images) > 1:
+            logger.warn('cannot post multiple images')
         else:
-            logger.warn('no message found in e-mail body: %s' % data)
+            # save image to disk
+            image = images[0]
+            image_filename = tempdir + image['filename']
+            image_content = image['content'].encode('utf-8')
+            with open(image_filename, 'wb') as fi:
+                fi.write(base64.decodestring(image_content))
+
+            # post text and image
+            stream.post(text=message, photo=image_filename)
+
+            # delete saved image
+            os.remove(image_filename)
+
+    # post text
     else:
-        logger.warn('unauthorized e-mail sender: %s' % data)
+        stream.post(message)
 
 
-def get_message(parts):
+def get_text_content(parts):
+
     message = ''
-    for part in parts:
-        if part['content-type'] == 'text/plain':
-            message = part['content']
-            break
+    for part in get_parts(parts, 'text/plain'):
+        message = message + part['content']
     return message
+
+
+def get_parts(parts, content_type):
+
+    matching_parts = []
+    for part in parts:
+        if part['content-type'].startswith(content_type):
+            matching_parts.append(part)
+    return matching_parts
 
 
 def init():

@@ -77,7 +77,7 @@ def post_diaspora(data):
         posted = True
 
     if posted and app.config['app']['global']['ack']:
-        mail(sender, 'Diaspora posted', message)
+        mail(authorized_sender, 'Diaspora posted', message)
 
 
 def get_text_content(parts):

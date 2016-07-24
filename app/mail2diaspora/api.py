@@ -5,6 +5,7 @@ import os
 import logging
 import base64
 import diaspy
+import requests
 from flask import request, make_response, abort
 from mail2diaspora import app
 

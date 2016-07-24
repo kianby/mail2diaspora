@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 authorized_sender = app.config['app']['global']['sender']
 tempdir = app.config['app']['global']['tempdir']
 dconfig = app.config['app']['diaspora']
+srmailurl = app.config['app']['global']['ack']
 
 
 @app.route("/inbox", methods=['POST'])
@@ -32,6 +33,8 @@ def post_diaspora(data):
     if authorized_sender not in data['from']:
         logger.warn('unauthorized e-mail sender: %s' % data)
         return
+
+    posted = False
 
     conn = diaspy.connection.Connection(
         pod=dconfig['pod'],
@@ -63,6 +66,7 @@ def post_diaspora(data):
 
             # post text and image
             stream.post(text=message, photo=image_filename)
+            posted = True
 
             # delete saved image
             os.remove(image_filename)
@@ -70,6 +74,10 @@ def post_diaspora(data):
     # post text
     else:
         stream.post(message)
+        posted = True
+
+    if posted and app.config['app']['global']['ack']:
+        mail(sender, 'Diaspora posted', message)
 
 
 def get_text_content(parts):
@@ -87,6 +95,21 @@ def get_parts(parts, content_type):
         if part['content-type'].startswith(content_type):
             matching_parts.append(part)
     return matching_parts
+
+
+def mail(to_email, subject, message):
+
+    headers = {'Content-Type': 'application/json; charset=utf-8'}
+    msg = {
+        'to': to_email,
+        'subject': subject,
+        'content': message
+    }
+    r = requests.post(srmailurl, data=json.dumps(msg), headers=headers)
+    if r.status_code in (200, 201):
+        logger.debug('Email for %s posted' % to_email)
+    else:
+        logger.warn('Cannot post email for %s' % to_email)
 
 
 def init():

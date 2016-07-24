@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 authorized_sender = app.config['app']['global']['sender']
 tempdir = app.config['app']['global']['tempdir']
 dconfig = app.config['app']['diaspora']
-srmailurl = app.config['app']['global']['ack']
+srmailurl = app.config['app']['global']['srmail']
 
 
 @app.route("/inbox", methods=['POST'])

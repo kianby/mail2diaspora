@@ -2,7 +2,9 @@
     "global" : {
         "lang": "en",              # language (unused)
         "sender": "",              # check sender e-mail to ignore spamming
-        "tempdir": "./"            # temporarly directory to save images
+        "tempdir": "./",           # temporarly directory to save images
+        "ack": true,               # send HTTP ack to SRMail
+        "srmail":"http://..."      # SRMail URL
     },
     "http": {
         "host": "127.0.0.1",       # HTTP host and port to receive e-mails

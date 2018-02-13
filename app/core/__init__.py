@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import signal
 import sys
 import os
 import json
@@ -29,6 +30,10 @@ def configure_logging(level):
     logger.addHandler(ch)
 
 
+def signal_handler(signal, frame):
+    print('CTRL-C caught')
+
+
 # configure logging
 logger = logging.getLogger(__name__)
 configure_logging(logging.DEBUG)
@@ -39,8 +44,9 @@ logger.info('Starting Mail_2_Diaspora application')
 if(config.rabbitmq['active']):
     c = rmqclient.start()
 
-if config.general['interactive']:
-    input("\nPress Enter to stop.")
+signal.signal(signal.SIGINT, signal_handler)
+print('Press Ctrl+C')
+signal.pause()
 
 if(config.rabbitmq['active']):
     c = rmqclient.stop()

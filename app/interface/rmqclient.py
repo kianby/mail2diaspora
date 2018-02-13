@@ -4,8 +4,6 @@
 import pika
 import json
 import logging
-import re
-import subprocess
 import base64
 import diaspy
 from threading import Thread
@@ -53,6 +51,7 @@ def post_diaspora(data):
 
     posted = False
 
+    print(config.diaspora)
     conn = diaspy.connection.Connection(
         pod=config.diaspora['pod'],
         username=config.diaspora['username'],

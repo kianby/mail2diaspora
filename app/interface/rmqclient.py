@@ -49,10 +49,6 @@ def send_delete_command(content):
 
 def post_diaspora(data):
 
-    if authorized_sender not in data['from']:
-        logger.warn('unauthorized e-mail sender: %s' % data)
-        return
-
     posted = False
 
     conn = diaspy.connection.Connection(

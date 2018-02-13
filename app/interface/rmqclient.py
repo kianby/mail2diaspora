@@ -54,9 +54,9 @@ def post_diaspora(data):
     posted = False
 
     conn = diaspy.connection.Connection(
-        pod=dconfig['pod'],
-        username=dconfig['username'],
-        password=dconfig['password'])
+        pod=config.diaspora['pod'],
+        username=config.diaspora['username'],
+        password=config.diaspora['password'])
     conn.login()
     stream = diaspy.streams.Stream(conn)
 

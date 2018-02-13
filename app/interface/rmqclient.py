@@ -6,6 +6,8 @@ import json
 import logging
 import re
 import subprocess
+import base64
+import diaspy
 from threading import Thread
 from conf import config
 

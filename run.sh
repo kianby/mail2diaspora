@@ -1,2 +1,2 @@
 #!/bin/sh
-python app/mail2diaspora.py "$@"
+python app/run.py "$@"

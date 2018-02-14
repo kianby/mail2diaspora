@@ -44,7 +44,7 @@ def send_delete_command(content):
                           routing_key='mail.command.delete',
                           body=json.dumps(content, indent=False, sort_keys=False))
     connection.close()
-    logger.info('Email accepted. Delete request sent for %s' % content)
+    logger.info('Email accepted. Delete request sent')
 
 
 def post_diaspora(data):
@@ -134,8 +134,11 @@ def process_message(chan, method, properties, body):
 
     if topic == 'mail.message' and data['subject'].upper() == 'DIASPORA':
         logger.info('new message => {}'.format(data))
-        send_delete_command(data)
-        post_diaspora(data)
+        try:
+            send_delete_command(data)
+            post_diaspora(data)
+        except:
+            logger.exception('post exception')
 
 
 class CommandConsumer(Thread):

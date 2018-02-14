@@ -16,11 +16,10 @@ def load_json(filename):
 
 
 @clize
-def mail2diaspora(config_pathname, interactive=False):
+def mail2diaspora(config_pathname):
     """Mail2Diaspora
 
     :param config_pathname: configuration JSON file.
-    :param interactive: runs in console mode.
     """
 
     # load and validate startup config
@@ -33,8 +32,8 @@ def mail2diaspora(config_pathname, interactive=False):
     config.diaspora = conf['diaspora']
     config.rabbitmq = conf['rabbitmq']
     
+    os.chdir(config.general['tempdir'])
     config.general['cwd'] = os.getcwd()
-    config.general['interactive'] = interactive
     
     # start application
     from core import app

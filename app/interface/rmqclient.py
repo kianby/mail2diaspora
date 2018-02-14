@@ -74,7 +74,7 @@ def post_diaspora(data):
         else:
             # save image to disk
             image = images[0]
-            image_filename = config.general['tempdir'] + image['filename']
+            image_filename = image['filename']
             image_content = image['content'].encode('utf-8')
             with open(image_filename, 'wb') as fi:
                 fi.write(base64.decodestring(image_content))

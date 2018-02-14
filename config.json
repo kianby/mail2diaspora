@@ -1,6 +1,6 @@
 {
     "general" : {
-        "tempdir": "./"   
+        "tempdir": "/tmp"   
     },
     "rabbitmq": {
         "active": true,

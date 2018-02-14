@@ -6,10 +6,10 @@ emails. It is part of my ecosystem built around RabbitMQ. It depends on
 dependencies are listed in **requirements.txt**. Mail2Diaspora is written in
 Python 3.
 
-**config.json** is a configuration example.
+*config.json* is a configuration example.
 
 
-Diaspy connection patch for Framasphere:
+**Diaspy connection patch for Framasphere:**
 
     class Connection():
         """Object representing connection with the pod.

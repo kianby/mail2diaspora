@@ -7,7 +7,6 @@ import os
 import json
 import logging
 from conf import config
-from interface import rmqclient
 
 app = "mail2diaspora"
 
@@ -39,6 +38,8 @@ logger = logging.getLogger(__name__)
 configure_logging(logging.DEBUG)
 
 logger.info('Starting Mail_2_Diaspora application')
+
+from interface import rmqclient
 
 # start ZMQ client
 if(config.rabbitmq['active']):

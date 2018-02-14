@@ -7,26 +7,23 @@ import os
 import json
 import logging
 from conf import config
+from interface import rmqclient
 
 app = "mail2diaspora"
 
 
 def configure_logging(level):
-
-    logger.setLevel(level)
-
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
     ch = logging.StreamHandler()
     ch.setLevel(level)
-
     # create formatter
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s'
-                                  ' - %(message)s')
-
+    formatter = logging.Formatter(
+        '[%(asctime)s] %(name)s %(levelname)s %(message)s')
     # add formatter to ch
     ch.setFormatter(formatter)
-
     # add ch to logger
-    logger.addHandler(ch)
+    root_logger.addHandler(ch)
 
 
 def signal_handler(signal, frame):
@@ -35,11 +32,9 @@ def signal_handler(signal, frame):
 
 # configure logging
 logger = logging.getLogger(__name__)
-configure_logging(logging.DEBUG)
+configure_logging(logging.INFO)
 
-logger.info('Starting Mail_2_Diaspora application')
-
-from interface import rmqclient
+logger.info('Starting mail2diaspora application')
 
 # start ZMQ client
 if(config.rabbitmq['active']):

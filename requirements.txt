@@ -2,7 +2,7 @@ attrs==17.4.0
 certifi==2018.1.18
 chardet==3.0.4
 clize==4.0.3
-diaspy==0.3.0
+diaspy-api==0.5.1
 docutils==0.14
 get==0.0.39
 idna==2.6

@@ -51,7 +51,6 @@ def post_diaspora(data):
 
     posted = False
 
-    print(config.diaspora)
     conn = diaspy.connection.Connection(
         pod=config.diaspora['pod'],
         username=config.diaspora['username'],

@@ -49,7 +49,6 @@ def send_delete_command(content):
 
 def post_diaspora(data):
 
-    logger.info('data={}'.format(data))
     posted = False
 
     conn = diaspy.connection.Connection(

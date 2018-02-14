@@ -1,8 +1,9 @@
-## Mail 2 Diaspora
+## Mail to Diaspora
 
 Small piece of code providing a way to post text and image to Diaspora via
-emails. It depends on [SRMail](https://github.com/kianby/srmail) to manage
-e-mails. Other dependencies are available via **Pip** and they are described in
-**requirements.txt**. Mail2Diaspora is written in Python 3.
+emails. It is part of my ecosystem built around RabbitMQ. It depends on
+[SRMail](https://github.com/kianby/srmail) to send and receive e-mails. Other
+dependencies are listed in **requirements.txt**. Mail2Diaspora is written in
+Python 3.
 
-Look at self-documented **config.json** to know more.
+**config.json** is a configuration example.

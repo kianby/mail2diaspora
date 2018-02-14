@@ -6,6 +6,7 @@ import json
 import logging
 import base64
 import diaspy
+import os
 from threading import Thread
 from conf import config
 

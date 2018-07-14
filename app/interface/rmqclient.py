@@ -9,20 +9,25 @@ import diaspy
 import os
 from threading import Thread
 from conf import config
+from util import rabbit
 
 logger = logging.getLogger(__name__)
 
 
 def get_rabbitmq_connection():
+
     credentials = pika.PlainCredentials(
         config.rabbitmq['username'], config.rabbitmq['password'])
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=config.rabbitmq['host'], port=config.rabbitmq[
-                                         'port'], credentials=credentials, virtual_host=config.rabbitmq['vhost']))
-    return connection
+    parameters = pika.ConnectionParameters(
+        host=config.rabbitmq['host'],
+        port=config.rabbitmq['port'],
+        credentials=credentials,
+        virtual_host=config.rabbitmq['vhost']
+    )
+    return rabbit.Connection(parameters)
 
 
 def mail(to_email, subject, message):
-
     body = {
         'to': to_email,
         'subject': subject,
@@ -38,7 +43,6 @@ def mail(to_email, subject, message):
 
 
 def send_delete_command(content):
-
     connection = get_rabbitmq_connection()
     channel = connection.channel()
     channel.basic_publish(exchange=config.rabbitmq['exchange'],
@@ -49,7 +53,6 @@ def send_delete_command(content):
 
 
 def post_diaspora(data):
-
     posted = False
 
     conn = diaspy.connection.Connection(
@@ -97,7 +100,6 @@ def post_diaspora(data):
 
 
 def get_text_content(parts):
-
     message = ''
     for part in get_parts(parts, 'text/plain'):
         message = message + part['content']
@@ -105,7 +107,6 @@ def get_text_content(parts):
 
 
 def get_parts(parts, content_type):
-
     matching_parts = []
     for part in parts:
         if part['content-type'].startswith(content_type):
@@ -113,64 +114,26 @@ def get_parts(parts, content_type):
     return matching_parts
 
 
-def mail(to_email, subject, message):
+class MailConsumer(rabbit.Consumer):
 
-    msg = {
-        'to': to_email,
-        'subject': subject,
-        'content': message
-    }
-    connection = get_rabbitmq_connection()
-    channel = connection.channel()
-    channel.basic_publish(exchange=config.rabbitmq['exchange'],
-                          routing_key='mail.command.send',
-                          body=json.dumps(msg, indent=False, sort_keys=False))
-    connection.close()
-    logger.debug('Email for %s posted' % to_email)
+    def process(self, channel, method, properties, body):
+        topic = method.routing_key
+        data = json.loads(body)
 
-
-def process_message(chan, method, properties, body):
-    topic = method.routing_key
-    data = json.loads(body)
-
-    if topic == 'mail.message' and data['subject'].upper() == 'DIASPORA':
-        logger.info('new message => {}'.format(data))
-        try:
-            send_delete_command(data)
-            post_diaspora(data)
-        except:
-            logger.exception('post exception')
-
-
-class CommandConsumer(Thread):
-
-    def run(self):
-
-        connection = get_rabbitmq_connection()
-        self.channel = connection.channel()
-        self.channel.exchange_declare(exchange=config.rabbitmq['exchange'],
-                                      exchange_type='topic')
-
-        result = self.channel.queue_declare(exclusive=True)
-        queue_name = result.method.queue
-        self.channel.queue_bind(exchange=config.rabbitmq['exchange'],
-                                queue=queue_name,
-                                routing_key='mail.message')
-        self.channel.basic_consume(process_message,
-                                   queue=queue_name,
-                                   no_ack=True)
-        self.channel.start_consuming()
-
-    def stop_gracefully(self):
-        self.channel.stop_consuming()
+        if topic == 'mail.message' and data['subject'].upper() == 'DIASPORA':
+            logger.info('new message => {}'.format(data))
+            try:
+                send_delete_command(data)
+                post_diaspora(data)
+            except:
+                logger.exception('post exception')
 
 
 def start():
-    consumer.start()
+    connection = get_rabbitmq_connection()
+    c = MailConsumer(connection, config.rabbitmq['exchange'], 'mail.message')
+    c.start()
 
 
 def stop():
-    consumer.stop_gracefully()
-
-
-consumer = CommandConsumer()
+    pass

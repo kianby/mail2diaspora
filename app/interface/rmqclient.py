@@ -33,22 +33,24 @@ def mail(to_email, subject, message):
         'subject': subject,
         'content': message
     }
-    connection = get_rabbitmq_connection()
+    connector = get_rabbitmq_connection()
+    connection = connector.open()
     channel = connection.channel()
     channel.basic_publish(exchange=config.rabbitmq['exchange'],
                           routing_key='mail.command.send',
                           body=json.dumps(body, indent=False, sort_keys=False))
-    connection.close()
+    connector.close()
     logger.info('Email for %s posted' % to_email)
 
 
 def send_delete_command(content):
-    connection = get_rabbitmq_connection()
+    connector = get_rabbitmq_connection()
+    connection = connector.open()
     channel = connection.channel()
     channel.basic_publish(exchange=config.rabbitmq['exchange'],
                           routing_key='mail.command.delete',
                           body=json.dumps(content, indent=False, sort_keys=False))
-    connection.close()
+    connector.close()
     logger.info('Email accepted. Delete request sent')
 
 

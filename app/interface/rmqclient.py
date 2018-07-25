@@ -55,6 +55,7 @@ def send_delete_command(content):
 
 
 def post_diaspora(data):
+
     posted = False
 
     conn = diaspy.connection.Connection(
@@ -84,6 +85,8 @@ def post_diaspora(data):
             image_content = image['content'].encode('utf-8')
             with open(image_filename, 'wb') as fi:
                 fi.write(base64.decodestring(image_content))
+
+            logger.info('DEBUG: message: %s ' % message)
 
             # post text and image
             stream.post(text=message, photo=image_filename)

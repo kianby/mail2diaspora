@@ -86,8 +86,6 @@ def post_diaspora(data):
             with open(image_filename, 'wb') as fi:
                 fi.write(base64.decodestring(image_content))
 
-            logger.info('DEBUG: message: %s ' % message)
-
             # post text and image
             stream.post(text=message, photo=image_filename)
             posted = True

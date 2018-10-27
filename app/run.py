@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import argparse
 import os
 import logging
 import time
-from clize import Clize, run
-from conf import config
 from apscheduler.schedulers.background import BackgroundScheduler
+from conf import config
 from core import diaspora
 
 # configure logging
@@ -23,7 +23,6 @@ def configure_logging(level):
     root_logger.addHandler(ch)
 
 
-@Clize
 def mail2diaspora(config_pathname):
 
     # configure logging
@@ -37,7 +36,9 @@ def mail2diaspora(config_pathname):
 
     # cron email fetcher
     scheduler = BackgroundScheduler()
-    scheduler.add_job(diaspora.mail_poll, "interval", seconds=config.getInt(config.MAIL_POLLING))
+    scheduler.add_job(
+        diaspora.mail_poll, "interval", seconds=config.getInt(config.MAIL_POLLING)
+    )
     scheduler.start()
 
     print("Press Ctrl+{0} to exit".format("Break" if os.name == "nt" else "C"))
@@ -51,5 +52,9 @@ def mail2diaspora(config_pathname):
 
     logger.info("Stop mail2diaspora application")
 
+
 if __name__ == "__main__":
-    run(mail2diaspora)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("config", help="config path name")
+    args = parser.parse_args()
+    mail2diaspora(args.config)

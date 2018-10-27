@@ -2,41 +2,54 @@
 # -*- coding:utf-8 -*-
 
 import os
-import json
-from clize import clize, run
-from conf import config, schema
-from jsonschema import validate
+import logging
+import time
+from clize import Clize, run
+from conf import config
+from apscheduler.schedulers.background import BackgroundScheduler
+from core import diaspora
+
+# configure logging
+def configure_logging(level):
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
+    ch = logging.StreamHandler()
+    ch.setLevel(level)
+    # create formatter
+    formatter = logging.Formatter("[%(asctime)s] %(name)s %(levelname)s %(message)s")
+    # add formatter to ch
+    ch.setFormatter(formatter)
+    # add ch to logger
+    root_logger.addHandler(ch)
 
 
-def load_json(filename):
-    jsondoc = None
-    with open(filename, 'rt') as json_file:
-        jsondoc = json.loads(json_file.read())
-    return jsondoc
-
-
-@clize
+@Clize
 def mail2diaspora(config_pathname):
-    """Mail2Diaspora
 
-    :param config_pathname: configuration JSON file.
-    """
+    # configure logging
+    logger = logging.getLogger(__name__)
+    configure_logging(logging.INFO)
 
-    # load and validate startup config
-    conf = load_json(config_pathname)
-    json_schema = json.loads(schema.json_schema) 
-    validate(conf, json_schema)
-    
-    # set configuration
-    config.general = conf['general']
-    config.diaspora = conf['diaspora']
-    config.rabbitmq = conf['rabbitmq']
-    
-    os.chdir(config.general['tempdir'])
-    config.general['cwd'] = os.getcwd()
-    
-    # start application
-    from core import app
+    logger.info("Start mail2diaspora application")
+    config.initialize(config_pathname)
 
-if __name__ == '__main__':
+    os.chdir(config.get(config.TEMP))
+
+    # cron email fetcher
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(diaspora.mail_poll, "interval", seconds=config.getInt(config.MAIL_POLLING))
+    scheduler.start()
+
+    print("Press Ctrl+{0} to exit".format("Break" if os.name == "nt" else "C"))
+    try:
+        # This is here to simulate application activity (which keeps the main thread alive).
+        while True:
+            time.sleep(2)
+    except (KeyboardInterrupt, SystemExit):
+        # Not strictly necessary if daemonic mode is enabled but should be done if possible
+        scheduler.shutdown()
+
+    logger.info("Stop mail2diaspora application")
+
+if __name__ == "__main__":
     run(mail2diaspora)

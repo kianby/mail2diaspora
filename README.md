@@ -1,3 +1,5 @@
+# [DEPRECATED]
+
 ## Mail to Diaspora
 
 Small piece of code providing a way to post text and image to Diaspora via
